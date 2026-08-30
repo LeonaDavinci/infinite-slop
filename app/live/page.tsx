@@ -47,7 +47,7 @@ export default function LivePage() {
     <>
       <Header />
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-[1440px]">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
@@ -66,15 +66,27 @@ export default function LivePage() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <Suspense
-              fallback={
-                <div className="aspect-video w-full animate-pulse rounded-3xl bg-zinc-100" />
-              }
-            >
-              <LivePlayer />
-            </Suspense>
-            <div className="h-[420px] lg:h-auto">
+          {/* Enlarged full-width player */}
+          <Suspense
+            fallback={
+              <div className="aspect-video w-full animate-pulse rounded-3xl bg-zinc-100" />
+            }
+          >
+            <LivePlayer />
+          </Suspense>
+
+          {/* Chat panel moved below the stream, full width */}
+          <div className="mx-auto mt-6 max-w-[960px]">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+              </span>
+              <h2 className="text-lg font-semibold text-zinc-900">
+                Live chat — your words become the next scene
+              </h2>
+            </div>
+            <div className="h-[520px] sm:h-[560px]">
               <Suspense
                 fallback={
                   <div className="h-full w-full animate-pulse rounded-3xl bg-zinc-100" />
