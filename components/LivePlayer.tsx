@@ -35,7 +35,7 @@ export default function LivePlayer() {
         title="Infinite Slop live stream"
         className="h-full w-full"
         allow="autoplay; fullscreen"
-        sandbox="allow-scripts allow-same-origin allow-popups"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
       />
       <a
         href={site.originStream}
