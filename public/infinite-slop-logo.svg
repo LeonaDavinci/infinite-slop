@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Infinite Slop logo">
+  <defs>
+    <linearGradient id="isGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8E2DE2"/>
+      <stop offset="100%" stop-color="#C5156B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 8 sun-ray dots -->
+  <g fill="url(#isGrad)">
+    <circle cx="256" cy="51"  r="15"/>
+    <circle cx="401" cy="111" r="15"/>
+    <circle cx="461" cy="256" r="15"/>
+    <circle cx="401" cy="401" r="15"/>
+    <circle cx="256" cy="461" r="15"/>
+    <circle cx="111" cy="401" r="15"/>
+    <circle cx="51"  cy="256" r="15"/>
+    <circle cx="111" cy="111" r="15"/>
+  </g>
+
+  <!-- player triangle -->
+  <polygon points="150,120 150,392 400,256" fill="url(#isGrad)"/>
+
+  <!-- bold letter i (white, on top of triangle) -->
+  <g fill="#ffffff">
+    <circle cx="233" cy="205" r="24"/>
+    <rect x="211" y="245" width="44" height="95" rx="22"/>
+  </g>
+</svg>
