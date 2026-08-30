@@ -6,20 +6,24 @@
     </linearGradient>
   </defs>
 
-  <!-- 8 sun-ray dots -->
+  <!-- 8 sun-ray dots (enlarged 2x) -->
   <g fill="url(#isGrad)">
-    <circle cx="256" cy="51"  r="15"/>
-    <circle cx="401" cy="111" r="15"/>
-    <circle cx="461" cy="256" r="15"/>
-    <circle cx="401" cy="401" r="15"/>
-    <circle cx="256" cy="461" r="15"/>
-    <circle cx="111" cy="401" r="15"/>
-    <circle cx="51"  cy="256" r="15"/>
-    <circle cx="111" cy="111" r="15"/>
+    <circle cx="256" cy="51"  r="30"/>
+    <circle cx="401" cy="111" r="30"/>
+    <circle cx="461" cy="256" r="30"/>
+    <circle cx="401" cy="401" r="30"/>
+    <circle cx="256" cy="461" r="30"/>
+    <circle cx="111" cy="401" r="30"/>
+    <circle cx="51"  cy="256" r="30"/>
+    <circle cx="111" cy="111" r="30"/>
   </g>
 
-  <!-- player triangle -->
-  <polygon points="150,120 150,392 400,256" fill="url(#isGrad)"/>
+  <!-- player triangle (rounded corners via stroke linejoin) -->
+  <polygon points="150,120 150,392 400,256"
+           fill="url(#isGrad)"
+           stroke="url(#isGrad)"
+           stroke-width="44"
+           stroke-linejoin="round"/>
 
   <!-- bold letter i (white, on top of triangle) -->
   <g fill="#ffffff">

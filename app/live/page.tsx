@@ -21,12 +21,6 @@ export const metadata: Metadata = {
       "Watch Infinite Slop live. An infinite, interactive AI-generated video stream.",
     url: `${site.url}/live`,
     images: ["/og-image.png"],
-    videos: [
-      {
-        url: site.originStream,
-        type: "text/html",
-      },
-    ],
   },
 };
 
@@ -56,14 +50,14 @@ export default function LivePage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
                 Infinite Slop Live
               </h1>
-              <p className="mt-2 text-zinc-400">
-                An infinite AI-generated stream. Chat writes the next scene.
+              <p className="mt-2 text-zinc-600">
+                A never-ending AI-generated stream. Chat writes the next scene.
               </p>
             </div>
-            <div className="hidden items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm text-zinc-300 sm:flex">
+            <div className="hidden items-center gap-2 rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 sm:flex">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
@@ -75,7 +69,7 @@ export default function LivePage() {
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <Suspense
               fallback={
-                <div className="aspect-video w-full animate-pulse rounded-3xl bg-zinc-900" />
+                <div className="aspect-video w-full animate-pulse rounded-3xl bg-zinc-100" />
               }
             >
               <LivePlayer />
@@ -83,7 +77,7 @@ export default function LivePage() {
             <div className="h-[420px] lg:h-auto">
               <Suspense
                 fallback={
-                  <div className="h-full w-full animate-pulse rounded-3xl bg-zinc-900" />
+                  <div className="h-full w-full animate-pulse rounded-3xl bg-zinc-100" />
                 }
               >
                 <ChatPanel />
@@ -91,23 +85,33 @@ export default function LivePage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="text-lg font-semibold text-white">
+          <div className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-zinc-900">
               About this stream
             </h2>
-            <p className="mt-2 text-zinc-400">
+            <p className="mt-2 text-zinc-600">
               This page mirrors the original{" "}
               <a
                 href={site.originStream}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#C5156B] underline hover:text-white"
+                className="font-medium text-[#C5156B] underline hover:text-zinc-900"
               >
                 Infinite Slop broadcast
               </a>
               . If the player does not load, open the original stream in a new
               tab. The stream is interactive: anything you type in chat becomes
-              the prompt for the next AI-generated scene.
+              the prompt for the next AI-generated scene. The project was
+              announced on{" "}
+              <a
+                href={site.originPost}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+              >
+                {site.originPostLabel}
+              </a>
+              .
             </p>
           </div>
         </div>

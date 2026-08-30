@@ -8,7 +8,7 @@ import { site } from "@/lib/config";
 export const metadata: Metadata = {
   title: "What Is Infinite Slop?",
   description:
-    "A complete introduction to Infinite Slop: the never-ending AI live stream where every chat message drives the next generated scene.",
+    "A complete introduction to Infinite Slop: the never-ending AI live stream where chat prompts become the next generated scene. Original concept by Pieter Levels.",
   alternates: {
     canonical: "/blog/what-is-infinite-slop",
   },
@@ -19,7 +19,7 @@ const articleJsonLd = {
   "@type": "Article",
   headline: "What Is Infinite Slop?",
   description:
-    "A complete introduction to Infinite Slop: the never-ending AI live stream where every chat message drives the next generated scene.",
+    "A complete introduction to Infinite Slop: the never-ending AI live stream where chat prompts become the next generated scene.",
   author: {
     "@type": "Person",
     name: site.author,
@@ -45,59 +45,111 @@ export default function WhatIsPost() {
       <main className="flex-1 px-4 py-16 sm:px-6 lg:px-8">
         <article className="mx-auto max-w-3xl">
           <nav className="text-sm text-zinc-500" aria-label="Breadcrumb">
-            <Link href="/blog" className="hover:text-white">
+            <Link href="/blog" className="hover:text-zinc-900">
               Blog
             </Link>{" "}
-            / <span className="text-zinc-300">What Is Infinite Slop?</span>
+            / <span className="text-zinc-700">What Is Infinite Slop?</span>
           </nav>
 
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
             What Is Infinite Slop?
           </h1>
-          <p className="mt-4 text-lg text-zinc-400">
-            Infinite Slop is an infinite, interactive AI-generated live stream. It
-            plays forever, and the audience decides what happens next.
+          <p className="mt-4 text-lg text-zinc-600">
+            Infinite Slop is a live stream that never stops. Instead of playing
+            pre-recorded videos, it generates each clip with AI. The audience
+            participates by typing ideas into a chat box, and every idea becomes
+            a prompt for the next scene.
           </p>
 
-          <h2 className="mt-12 text-2xl font-semibold text-white">
-            The basic idea
+          <h2 className="mt-12 text-2xl font-semibold text-zinc-900">
+            The core concept
           </h2>
-          <p className="text-zinc-300">
-            Imagine a live TV channel that never repeats. Instead of a fixed
-            schedule, the content is generated in real time by AI. Viewers type
-            messages into a chat box, and each message becomes the prompt for the
-            next clip. The AI then tries to connect the new clip to the previous
-            one, so the broadcast keeps some kind of sequence or storyline.
+          <p className="mt-4 leading-7 text-zinc-700">
+            Think of a television channel that has no schedule, no rerun list,
+            and no final episode. Every time someone sends a message in chat, an
+            AI video model receives that message as a prompt and produces a new
+            short clip. The system then tries to connect the new clip to the one
+            before it, so the broadcast keeps some kind of thread or story.
           </p>
-          <p className="text-zinc-300">
-            That is Infinite Slop. The name is playful, but the concept is a real
-            experiment in AI-generated media. It explores what happens when
-            content is not produced ahead of time, but created on demand by the
-            audience.
+          <p className="mt-4 leading-7 text-zinc-700">
+            That is the essence of Infinite Slop. The name is deliberately
+            playful, but the underlying idea is a serious experiment in
+            generative media: what happens when content is not produced ahead
+            of time, but invented on the spot by the audience and the AI
+            together?
           </p>
 
-          <h2 className="mt-10 text-2xl font-semibold text-white">
-            Why people watch it
+          <h2 className="mt-12 text-2xl font-semibold text-zinc-900">
+            Why people keep watching
           </h2>
-          <p className="text-zinc-300">
-            Part of the appeal is unpredictability. Because the next scene is
-            driven by chat, no one knows what will appear next. Another part is the
-            sense of participation: a single message can change the direction of
-            the entire stream.
+          <p className="mt-4 leading-7 text-zinc-700">
+            Part of the appeal is pure unpredictability. Because the next scene
+            is driven by chat, nobody knows what will appear next. Another part
+            is agency: a single message can reshape the entire stream. Viewers
+            are not just watching a broadcast; they are co-writing it in real
+            time.
           </p>
-          <p className="text-zinc-300">
-            The project also sits at the edge of a larger trend: AI that can
-            generate video. As video models become faster and cheaper, formats like
-            Infinite Slop become possible. A stream that once required a studio,
-            crew, and broadcast equipment can now run from a model and a chat box.
+          <p className="mt-4 leading-7 text-zinc-700">
+            Infinite Slop also sits at the intersection of two fast-moving
+            trends: live streaming and generative AI. As video models become
+            faster and cheaper, formats like this become feasible. A 24/7
+            broadcast that once required a studio, crew, and broadcast
+            infrastructure can now run from a fine-tuned model and a chat
+            interface.
           </p>
 
-          <h2 className="mt-10 text-2xl font-semibold text-white">
+          <h2 className="mt-12 text-2xl font-semibold text-zinc-900">
+            Origins and attribution
+          </h2>
+          <p className="mt-4 leading-7 text-zinc-700">
+            Infinite Slop was built by Pieter Levels and shared on{" "}
+            <a
+              href={site.originPost}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+            >
+              {site.originPostLabel}
+            </a>
+            . The original idea came from streams by{" "}
+            <a
+              href="https://x.com/marcantoinefon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+            >
+              marcantoinefon
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://x.com/rehan_shei"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+            >
+              rehan_shei
+            </a>
+            . The stream is sponsored by{" "}
+            <a
+              href={site.sponsorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+            >
+              {site.sponsor}
+            </a>
+            , whose fine-tuned Max model makes the real-time loop possible.
+          </p>
+
+          <h2 className="mt-12 text-2xl font-semibold text-zinc-900">
             Where to watch
           </h2>
-          <p className="text-zinc-300">
+          <p className="mt-4 leading-7 text-zinc-700">
             You can watch the live stream on{" "}
-            <Link href="/live" className="text-[#C5156B] underline hover:text-white">
+            <Link
+              href="/live"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+            >
               our Live page
             </Link>
             . It mirrors the original broadcast at{" "}
@@ -105,7 +157,7 @@ export default function WhatIsPost() {
               href={site.originStream}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#C5156B] underline hover:text-white"
+              className="font-medium text-[#C5156B] underline hover:text-zinc-900"
             >
               infiniteslop.ai
             </a>

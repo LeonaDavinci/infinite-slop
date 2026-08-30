@@ -2,16 +2,18 @@ export const site = {
   name: "Infinite Slop",
   tagline: "Infinite Interactive AI Generated Live Stream",
   description:
-    "Infinite Slop is an infinite, interactive AI-generated live stream. Anything you type in chat becomes the next video, connected into an endless storyline by AI.",
+    "Infinite Slop is an endless, interactive AI-generated live stream. Type anything in chat and AI creates the next video, weaving every scene into a never-ending storyline.",
   longDescription:
-    "Watch an infinite AI-generated live stream that never ends. Type anything in chat and AI will generate the next scene, weaving it into the previous video. Built by Pieter Levels and powered by fal.ai's fine-tuned Max video model.",
+    "Watch an infinite AI-generated live stream that never stops. Send a chat message and AI turns it into the next scene, connecting it to everything that came before. Built by Pieter Levels and powered by fal.ai's fine-tuned Max video model.",
   url: "https://www.infinite-slop.com",
   domain: "www.infinite-slop.com",
   author: "Pieter Levels",
   authorUrl: "https://levels.io",
+  authorHandle: "@levelsio",
   sponsor: "fal.ai",
   sponsorUrl: "https://fal.ai",
   originPost: "https://levels.io/i-built-infinite-slop",
+  originPostLabel: "levels.io/infinite-slop",
   originStream: "https://infiniteslop.ai",
   twitter: "@levelsio",
   keywords: [
@@ -19,12 +21,15 @@ export const site = {
     "infinite slop AI live stream",
     "AI generated live stream",
     "levelsio infinite slop",
+    "levels.io infinite slop",
     "interactive AI stream",
     "fal.ai video",
     "Max AI video model",
     "Minimax H3",
     "infinite AI video",
     "watch infinite slop",
+    "chat driven AI video",
+    "24/7 AI generated stream",
   ],
   stats: {
     views: "938,223",
@@ -46,14 +51,21 @@ export const posts = [
     slug: "what-is-infinite-slop",
     title: "What Is Infinite Slop?",
     description:
-      "A complete introduction to Infinite Slop, the never-ending AI-generated live stream where chat drives the storyline.",
+      "A full introduction to Infinite Slop: the never-ending AI live stream where every chat message becomes the next generated scene.",
     publishedAt: "2026-08-30",
   },
   {
     slug: "how-infinite-slop-works",
     title: "How Infinite Slop Works",
     description:
-      "How AI turns chat messages into continuous video, the role of fal.ai and the Max model, and why it can generate faster than you can watch.",
+      "How AI transforms chat prompts into continuous video, the role of fal.ai and the Max model, and why it can generate faster than real time.",
+    publishedAt: "2026-08-30",
+  },
+  {
+    slug: "fal-ai-max-model",
+    title: "The fal.ai Max Model Behind Infinite Slop",
+    description:
+      "Meet Max: the fine-tuned Minimax H3 video model that makes Infinite Slop's 24/7 AI live stream possible.",
     publishedAt: "2026-08-30",
   },
 ];

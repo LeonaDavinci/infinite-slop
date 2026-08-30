@@ -7,24 +7,24 @@ import { site } from "@/lib/config";
 
 const features = [
   {
-    title: "Infinite generation",
+    title: "Truly infinite playback",
     description:
-      "The stream keeps going. Every new scene is generated on the fly, so there is no last episode.",
+      "There is no final episode. Every scene is created on demand, so the live stream can keep running 24/7 without running out of content.",
   },
   {
-    title: "Chat drives the story",
+    title: "Chat becomes the script",
     description:
-      "Type anything and the AI will generate the next video, attempting to connect it to what came before.",
+      "Anything you type in chat is turned into a prompt. The AI then produces the next clip and attempts to bridge it to the previous scene.",
   },
   {
-    title: "Faster than you watch",
+    title: "Faster than real time",
     description:
-      "Fine-tuned on Minimax H3 as Max by fal.ai, the model generates video faster than real-time playback.",
+      "Built on fal.ai's fine-tuned Max model, the pipeline generates clips fast enough to stay ahead of the viewer, removing loading waits.",
   },
   {
-    title: "Always live",
+    title: "Open to everyone",
     description:
-      "A 24/7 broadcast of surreal, ever-evolving AI slop you can drop into at any moment.",
+      "The stream is free to watch and interact with. No account is required to see what an AI-powered live broadcast looks like.",
   },
 ];
 
@@ -32,22 +32,27 @@ const faqs = [
   {
     question: "What is Infinite Slop?",
     answer:
-      "Infinite Slop is an infinite, interactive AI-generated live stream. Chat messages become prompts for the next video clip, and the AI tries to connect each clip to the previous one.",
+      "Infinite Slop is a never-ending, interactive AI-generated live stream. Viewers type messages in chat, and each message inspires the next AI-generated video clip. The AI tries to connect the new clip to what came before, creating a loose but continuous storyline.",
   },
   {
-    question: "Who built Infinite Slop?",
+    question: "Who created Infinite Slop?",
     answer:
-      "The project was built by Pieter Levels and is inspired by the original streams from marcantoinefon and rehan_shei.",
+      "The project was built by Pieter Levels. The original idea was inspired by live streams from marcantoinefon and rehan_shei, which showed how AI could power continuous broadcasts. You can read the full announcement on levels.io/infinite-slop.",
   },
   {
-    question: "What AI model powers the stream?",
+    question: "What AI model runs the stream?",
     answer:
-      "fal.ai fine-tuned Minimax H3 into a model called Max, making it roughly 50x faster so it can generate video faster than you can watch.",
+      "The stream uses Max, a fine-tuned version of Minimax H3 created and accelerated by fal.ai. The fine-tune made the model roughly 50x faster, which is essential for a real-time experience.",
   },
   {
-    question: "Is Infinite Slop free to watch?",
+    question: "Can I watch Infinite Slop for free?",
     answer:
-      "Yes. The stream is free to watch and interact with, sponsored by fal.ai.",
+      "Yes. The original stream at infiniteslop.ai is free, and this site embeds it with extra context, an unmute overlay, and a chat panel.",
+  },
+  {
+    question: "How is this site related to levels.io?",
+    answer:
+      "This is an SEO-focused companion site for the project Pieter Levels announced at levels.io/infinite-slop. It links back to the official announcement and the original live stream.",
   },
 ];
 
@@ -71,9 +76,9 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#8E2DE2]/30 via-[#C5156B]/10 to-transparent"></div>
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#8E2DE2]/10 via-[#C5156B]/5 to-transparent"></div>
           <div className="mx-auto max-w-7xl text-center">
-            <div className="mb-8 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300">
+            <div className="mb-8 inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 shadow-sm">
               <span className="mr-2 h-2 w-2 rounded-full bg-[#C5156B]"></span>
               Live on {site.domain}
             </div>
@@ -85,14 +90,14 @@ export default function Home() {
               className="mx-auto mb-10"
               priority
             />
-            <h1 className="mx-auto max-w-4xl text-5xl font-semibold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mx-auto max-w-4xl text-5xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-6xl lg:text-7xl">
               Infinite Slop{" "}
               <span className="gradient-text">Never Ends</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">
-              An infinite, interactive AI-generated live stream. Type anything
-              in chat and the AI will generate the next scene, connecting it to
-              the story so far.
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
+              A never-ending, interactive AI-generated live stream. Type in
+              chat and the next scene is generated for you, stitched into the
+              story by AI.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -109,30 +114,42 @@ export default function Home() {
                 href={site.originPost}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-8 py-4 text-base font-medium text-white transition hover:bg-white/10"
+                className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-8 py-4 text-base font-medium text-zinc-900 shadow-sm transition hover:bg-zinc-50"
               >
-                Read the story
+                Read the original announcement
               </a>
             </div>
+            <p className="mt-6 text-sm text-zinc-500">
+              Inspired by{" "}
+              <a
+                href={site.originPost}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-zinc-700 underline hover:text-zinc-900"
+              >
+                {site.originPostLabel}
+              </a>
+              .
+            </p>
           </div>
         </section>
 
         {/* Stats */}
-        <section className="border-y border-white/10 bg-white/[0.02] px-4 py-12 sm:px-6 lg:px-8">
+        <section className="border-y border-zinc-200 bg-zinc-50 px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-4xl flex-col justify-around gap-8 text-center sm:flex-row">
             <div>
-              <p className="text-4xl font-bold text-white">{site.stats.views}</p>
-              <p className="mt-1 text-sm text-zinc-400">Views</p>
+              <p className="text-4xl font-bold text-zinc-900">{site.stats.views}</p>
+              <p className="mt-1 text-sm text-zinc-600">Views</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-white">{site.stats.likes}</p>
-              <p className="mt-1 text-sm text-zinc-400">Likes</p>
+              <p className="text-4xl font-bold text-zinc-900">{site.stats.likes}</p>
+              <p className="mt-1 text-sm text-zinc-600">Likes</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-white">
+              <p className="text-4xl font-bold text-zinc-900">
                 {site.stats.reposts}
               </p>
-              <p className="mt-1 text-sm text-zinc-400">Reposts</p>
+              <p className="mt-1 text-sm text-zinc-600">Reposts</p>
             </div>
           </div>
         </section>
@@ -141,24 +158,24 @@ export default function Home() {
         <section className="px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
                 How it works
               </h2>
-              <p className="mt-4 text-lg text-zinc-400">
-                Chat becomes content. Content becomes a story. The story never
-                stops.
+              <p className="mt-4 text-lg text-zinc-600">
+                Chat becomes a prompt. The prompt becomes a scene. The scenes
+                become an endless story.
               </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((f) => (
                 <div
                   key={f.title}
-                  className="glass rounded-3xl p-6 transition hover:-translate-y-1 hover:bg-white/[0.06]"
+                  className="card rounded-3xl p-6 transition hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-zinc-900">
                     {f.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-600">
                     {f.description}
                   </p>
                 </div>
@@ -169,19 +186,27 @@ export default function Home() {
 
         {/* Live CTA */}
         <section className="px-4 py-24 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#8E2DE2]/20 to-[#C5156B]/20 p-1">
-            <div className="rounded-[1.9rem] bg-black/60 px-8 py-16 text-center backdrop-blur-xl sm:px-16">
-              <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#8E2DE2]/10 to-[#C5156B]/10 p-1">
+            <div className="rounded-[1.9rem] bg-white/90 px-8 py-16 text-center backdrop-blur-xl sm:px-16">
+              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
                 Drop into the stream
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-300">
-                The live page recreates the experience from the original
-                Infinite Slop broadcast. Unmute, open chat, and let the AI take
-                over.
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
+                The live page mirrors the original Infinite Slop broadcast. Unmute,
+                open chat, and let the AI take over. Read the announcement on{" "}
+                <a
+                  href={site.originPost}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+                >
+                  {site.originPostLabel}
+                </a>
+                .
               </p>
               <Link
                 href="/live"
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-black transition hover:bg-zinc-100"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#8E2DE2] to-[#C5156B] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#C5156B]/20 transition hover:opacity-90"
               >
                 Go to Live Stream
               </Link>
@@ -192,22 +217,22 @@ export default function Home() {
         {/* FAQ */}
         <section className="px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl">
-            <h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
               Frequently asked questions
             </h2>
             <div className="space-y-4">
               {faqs.map((f) => (
                 <details
                   key={f.question}
-                  className="group glass rounded-2xl p-6 open:bg-white/[0.05]"
+                  className="group card rounded-2xl p-6 open:shadow-md"
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between text-lg font-semibold text-white">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-lg font-semibold text-zinc-900">
                     {f.question}
-                    <span className="ml-4 text-zinc-500 transition group-open:rotate-180">
+                    <span className="ml-4 text-zinc-400 transition group-open:rotate-180">
                       ▼
                     </span>
                   </summary>
-                  <p className="mt-4 leading-relaxed text-zinc-400">
+                  <p className="mt-4 leading-relaxed text-zinc-600">
                     {f.answer}
                   </p>
                 </details>

@@ -9,7 +9,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
           <Image
@@ -19,12 +19,12 @@ export default function Header() {
             height={40}
             priority
           />
-          <span className="text-lg font-semibold tracking-tight text-white">
+          <span className="text-lg font-semibold tracking-tight text-zinc-900">
             Infinite Slop
           </span>
         </Link>
         <nav
-          className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1 sm:flex"
+          className="hidden items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2 py-1 sm:flex"
           aria-label="Primary navigation"
         >
           {nav.map((item) => {
@@ -35,8 +35,8 @@ export default function Header() {
                 href={item.href}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                    ? "bg-zinc-100 text-zinc-900"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                 }`}
                 aria-current={active ? "page" : undefined}
               >
