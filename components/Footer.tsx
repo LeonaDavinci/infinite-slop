@@ -36,12 +36,12 @@ export default function Footer() {
         <div className="mt-8 border-t border-zinc-200 pt-8 text-center text-xs text-zinc-500">
           © {new Date().getFullYear()} {site.name}. Concept and announcement by{" "}
           <a
-            href={site.originPost}
+            href="https://levels.io"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-zinc-700 underline hover:text-zinc-900"
           >
-            {site.originPostLabel}
+            levels.io
           </a>
           . Powered by{" "}
           <a
