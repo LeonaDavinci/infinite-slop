@@ -1,10 +1,12 @@
 export const site = {
   name: "Infinite Slop",
+  keyword: "infiniteslop",
+  title: "Infiniteslop – Infinite AI Live Stream",
   tagline: "Infinite Interactive AI Generated Live Stream",
   description:
-    "Infinite Slop is an endless, interactive AI-generated live stream. Type anything in chat and AI creates the next video, weaving every scene into a never-ending storyline.",
+    "Infiniteslop is an endless interactive AI live stream. Type in chat and watch AI generate the next scene in a never-ending storyline.",
   longDescription:
-    "Watch an infinite AI-generated live stream that never stops. Send a chat message and AI turns it into the next scene, connecting it to everything that came before. Built by Pieter Levels and powered by fal.ai's fine-tuned Max video model.",
+    "Watch Infiniteslop, an infinite AI-generated live stream that never stops. Send a chat message and AI turns it into the next scene, connecting it to everything that came before. Built by Pieter Levels and powered by fal.ai's fine-tuned Max video model.",
   url: "https://www.infinite-slop.com",
   domain: "www.infinite-slop.com",
   author: "Pieter Levels",
@@ -17,7 +19,14 @@ export const site = {
   originStream: "https://infiniteslop.ai",
   twitter: "@levelsio",
   keywords: [
+    "infiniteslop",
+    "Infiniteslop",
     "Infinite Slop",
+    "infiniteslop live stream",
+    "watch infiniteslop free",
+    "infiniteslop ai generated video",
+    "infiniteslop 24/7 stream",
+    "how to watch infiniteslop",
     "infinite slop AI live stream",
     "AI generated live stream",
     "levelsio infinite slop",
@@ -27,7 +36,6 @@ export const site = {
     "Max AI video model",
     "Minimax H3",
     "infinite AI video",
-    "watch infinite slop",
     "chat driven AI video",
     "24/7 AI generated stream",
   ],

@@ -32,7 +32,7 @@ const faqs = [
   {
     question: "What is Infinite Slop?",
     answer:
-      "Infinite Slop is a never-ending, interactive AI-generated live stream. Viewers type messages in chat, and each message inspires the next AI-generated video clip. The AI tries to connect the new clip to what came before, creating a loose but continuous storyline.",
+      "Infiniteslop is a never-ending, interactive AI-generated live stream. Viewers type messages in chat, and each message inspires the next AI-generated video clip. The AI tries to connect the new clip to what came before, creating a loose but continuous storyline.",
   },
   {
     question: "Who created Infinite Slop?",
@@ -52,7 +52,7 @@ const faqs = [
   {
     question: "How is this site related to levels.io?",
     answer:
-      "This is an SEO-focused companion site for the project Pieter Levels announced at levels.io/infinite-slop. It links back to the official announcement and the original live stream.",
+      "This is an SEO-focused companion site for the Infiniteslop project Pieter Levels announced at levels.io/infinite-slop. It links back to the official announcement and the original live stream, and helps people learn how to watch Infiniteslop.",
   },
 ];
 
@@ -95,9 +95,9 @@ export default function Home() {
               <span className="gradient-text">Never Ends</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
-              A never-ending, interactive AI-generated live stream. Type in
-              chat and the next scene is generated for you, stitched into the
-              story by AI.
+              Infiniteslop is a never-ending, interactive AI-generated live
+              stream. Type in chat and the next scene is generated for you,
+              stitched into the story by AI. Watch Infiniteslop live, free, 24/7.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -192,8 +192,9 @@ export default function Home() {
                 Drop into the stream
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
-                The live page mirrors the original Infinite Slop broadcast. Unmute,
-                open chat, and let the AI take over. Read the announcement on{" "}
+                The Infiniteslop live page mirrors the original broadcast. Unmute,
+                open chat, and watch AI-generated video update in real time — a
+                24/7 AI broadcast anyone can join for free. Read the announcement on{" "}
                 <a
                   href={site.originPost}
                   target="_blank"
