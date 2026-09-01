@@ -213,6 +213,16 @@ export default function Home() {
               >
                 Go to Live Stream
               </Link>
+              <p className="mt-4 text-sm text-zinc-500">
+                Or browse the{" "}
+                <Link
+                  href="/moments"
+                  className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+                >
+                  hottest Infinite Slop moments
+                </Link>
+                .
+              </p>
             </div>
           </div>
         </section>

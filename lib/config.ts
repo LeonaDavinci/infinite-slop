@@ -40,6 +40,12 @@ export const site = {
     "infinite AI video",
     "chat driven AI video",
     "24/7 AI generated stream",
+    "infinite slop hot moments",
+    "infiniteslop hot moments",
+    "hot moments infinite slop",
+    "infinite slop best clips",
+    "infinite slop highlights",
+    "infinite slop viral moments",
   ],
   stats: {
     views: "938,223",
@@ -52,6 +58,7 @@ export const site = {
 export const nav = [
   { href: "/", label: "Home" },
   { href: "/live", label: "Live" },
+  { href: "/moments", label: "Moments" },
   { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
 ];
