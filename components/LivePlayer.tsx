@@ -1,11 +1,9 @@
 "use client";
 
-import { site } from "@/lib/config";
-
 export default function LivePlayer() {
   return (
     <a
-      href={site.originPost}
+      href="https://levels.io/infinite-slop"
       target="_blank"
       rel="noopener noreferrer"
       className="group relative block aspect-video w-full overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl shadow-[#C5156B]/10"
