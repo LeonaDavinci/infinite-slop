@@ -21,6 +21,24 @@ export const metadata = {
 
 const moments = [
   {
+    id: 7,
+    title: "Eldritch cockroach confronts eel scientists",
+    desc: "A chat prompt turned into a surreal lab scene where a giant glowing cockroach faces two scientists.",
+    duration: "0:31",
+    views: "96K",
+    image: "/infiniteslop-live-stream.jpg",
+    imageAlt: "infiniteslop live stream screenshot with eldritch cockroach",
+  },
+  {
+    id: 8,
+    title: "Radioactive cockroach in the lab",
+    desc: "Another user-driven scene: a glowing insect takes over a laboratory while chat continues to react.",
+    duration: "0:45",
+    views: "88K",
+    image: "/infiniteslop-stream-live.jpg",
+    imageAlt: "infiniteslop stream live screenshot with glowing cockroach",
+  },
+  {
     id: 1,
     title: "The neon city that never loaded",
     desc: "A chat prompt spawned an entire glowing skyline that kept re-rendering itself frame after frame.",
@@ -67,24 +85,6 @@ const moments = [
     duration: "0:54",
     views: "118K",
     grad: "from-[#8E2DE2] to-[#C5156B]",
-  },
-  {
-    id: 7,
-    title: "Eldritch cockroach confronts eel scientists",
-    desc: "A chat prompt turned into a surreal lab scene where a giant glowing cockroach faces two scientists.",
-    duration: "0:31",
-    views: "96K",
-    image: "/infiniteslop-live-stream.jpg",
-    imageAlt: "infiniteslop live stream screenshot with eldritch cockroach",
-  },
-  {
-    id: 8,
-    title: "Radioactive cockroach in the lab",
-    desc: "Another user-driven scene: a glowing insect takes over a laboratory while chat continues to react.",
-    duration: "0:45",
-    views: "88K",
-    image: "/infiniteslop-stream-live.jpg",
-    imageAlt: "infiniteslop stream live screenshot with glowing cockroach",
   },
 ];
 
