@@ -68,6 +68,24 @@ const moments = [
     views: "118K",
     grad: "from-[#8E2DE2] to-[#C5156B]",
   },
+  {
+    id: 7,
+    title: "Eldritch cockroach confronts eel scientists",
+    desc: "A chat prompt turned into a surreal lab scene where a giant glowing cockroach faces two scientists.",
+    duration: "0:31",
+    views: "96K",
+    image: "/infiniteslop-live-stream.jpg",
+    imageAlt: "infiniteslop live stream screenshot with eldritch cockroach",
+  },
+  {
+    id: 8,
+    title: "Radioactive cockroach in the lab",
+    desc: "Another user-driven scene: a glowing insect takes over a laboratory while chat continues to react.",
+    duration: "0:45",
+    views: "88K",
+    image: "/infiniteslop-stream-live.jpg",
+    imageAlt: "infiniteslop stream live screenshot with glowing cockroach",
+  },
 ];
 
 const collectionJsonLd = {
@@ -136,17 +154,41 @@ export default function MomentsPage() {
                   className="card group overflow-hidden rounded-3xl transition hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div
-                    className={`relative flex h-44 items-center justify-center bg-gradient-to-br ${m.grad}`}
+                    className={`relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br ${
+                      m.grad || "from-[#8E2DE2] to-[#C5156B]"
+                    }`}
                   >
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg transition group-hover:scale-110">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="ml-1 h-7 w-7 text-[#8E2DE2]"
-                      >
-                        <path d="M5 4.5v15l13.5-7.5L5 4.5z" />
-                      </svg>
-                    </span>
+                    {m.image ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={m.image}
+                          alt={m.imageAlt || m.title}
+                          className="h-full w-full object-cover transition group-hover:scale-105"
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/10">
+                          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg transition group-hover:scale-110">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="ml-1 h-7 w-7 text-[#8E2DE2]"
+                            >
+                              <path d="M5 4.5v15l13.5-7.5L5 4.5z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </>
+                    ) : (
+                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg transition group-hover:scale-110">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="ml-1 h-7 w-7 text-[#8E2DE2]"
+                        >
+                          <path d="M5 4.5v15l13.5-7.5L5 4.5z" />
+                        </svg>
+                      </span>
+                    )}
                     <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
                       {m.duration}
                     </span>
