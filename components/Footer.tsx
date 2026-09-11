@@ -34,25 +34,8 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-zinc-200 pt-8 text-center text-xs text-zinc-500">
-          © {new Date().getFullYear()} {site.name}. Concept and announcement by{" "}
-          <a
-            href="https://levels.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-zinc-700 underline hover:text-zinc-900"
-          >
-            levels.io
-          </a>
-          . Powered by{" "}
-          <a
-            href={site.sponsorUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-zinc-700 underline hover:text-zinc-900"
-          >
-            {site.sponsor}
-          </a>
-          .
+          © {new Date().getFullYear()} {site.name}. Concept and announcement by
+          unofficial company.
         </div>
       </div>
     </footer>
