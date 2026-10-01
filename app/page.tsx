@@ -227,6 +227,60 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Live video player (HLS playlist mirrored from infiniteslop.ai) */}
+        <section className="px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+                Watch the Infinite Slop live stream
+              </h2>
+              <p className="mt-4 text-lg text-zinc-600">
+                The live video feed is mirrored in real time from the original
+                24/7 Infiniteslop AI broadcast.
+              </p>
+            </div>
+            <div className="overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl shadow-[#C5156B]/10">
+              <video
+                data-live-video=""
+                muted
+                autoPlay
+                playsInline
+                preload="metadata"
+                aria-label="Infinite Slop live video"
+                aria-describedby="infiniteslop-live-player"
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                className="aspect-video w-full"
+                src="/playlist.m3u8"
+              >
+                Your browser cannot play this live stream.{" "}
+                <a
+                  href="https://infiniteslop.ai/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium underline"
+                >
+                  Watch on official website
+                </a>
+                .
+              </video>
+            </div>
+            <p className="mt-4 text-center text-sm text-zinc-500">
+              HLS playback requires a browser with native support (e.g. Safari).
+              Otherwise,{" "}
+              <a
+                href="https://infiniteslop.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+              >
+                watch on the official website
+              </a>
+              .
+            </p>
+          </div>
+        </section>
+
         {/* Latest stream screenshots */}
         <section className="px-4 py-24 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
