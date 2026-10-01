@@ -76,7 +76,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden px-4 pt-10 pb-24 sm:px-6 sm:pt-14 lg:px-8">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#8E2DE2]/10 via-[#C5156B]/5 to-transparent"></div>
           <div className="mx-auto max-w-7xl text-center">
             <div className="mb-8 inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 shadow-sm">
