@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const MANIFEST_URL = "/live/playlist.m3u8";
 const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
+const POSTER = "/infiniteslop-live-stream.jpg";
 
 type HlsErrorData = { fatal?: boolean };
 type HlsInstance = {
@@ -20,10 +21,14 @@ type HlsStatic = {
 
 export default function LiveStreamPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [failed, setFailed] = useState(false);
+  const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [muted, setMuted] = useState(true);
 
+  // Only start loading the stream after the visitor clicks play.
   useEffect(() => {
+    if (!started) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -33,8 +38,9 @@ export default function LiveStreamPlayer() {
     let attempts = 0;
 
     const scheduleRetry = () => {
-      if (cancelled || attempts >= 5) {
-        if (!cancelled) setFailed(true);
+      if (cancelled) return;
+      if (attempts >= 5) {
+        setFailed(true);
         return;
       }
       attempts += 1;
@@ -99,24 +105,58 @@ export default function LiveStreamPlayer() {
       video.removeEventListener("waiting", onWaiting);
       if (hls) hls.destroy();
     };
-  }, []);
+  }, [started]);
+
+  const toggleSound = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setMuted(video.muted);
+    if (!video.muted) video.play().catch(() => {});
+  };
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl shadow-[#C5156B]/10">
       <video
         ref={videoRef}
         data-live-video=""
+        poster={POSTER}
         muted
-        autoPlay
         playsInline
-        preload="metadata"
+        controls={started}
+        preload="none"
         aria-label="Infinite Slop live video"
         aria-describedby="infiniteslop-live-player"
         controlsList="nodownload noremoteplayback"
         disablePictureInPicture
         className="aspect-video w-full"
       />
-      {!failed && !playing ? (
+
+      {/* Click-to-play overlay: nothing loads until the visitor presses play */}
+      {!started && !failed ? (
+        <button
+          type="button"
+          onClick={() => setStarted(true)}
+          aria-label="Play the Infinite Slop live stream"
+          className="group absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/40 backdrop-blur-[2px] transition hover:bg-zinc-900/55"
+        >
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-[#8E2DE2] to-[#C5156B] shadow-xl shadow-[#C5156B]/40 transition group-hover:scale-105">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="ml-1 h-9 w-9 fill-white"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+          <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-white">
+            <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
+            LIVE — click to play
+          </span>
+        </button>
+      ) : null}
+
+      {started && !failed && !playing ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-zinc-900 text-white">
           <p className="flex items-center gap-2 text-sm">
             <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
@@ -124,6 +164,17 @@ export default function LiveStreamPlayer() {
           </p>
         </div>
       ) : null}
+
+      {started && !failed ? (
+        <button
+          type="button"
+          onClick={toggleSound}
+          className="absolute bottom-4 right-4 rounded-full bg-zinc-900/80 px-4 py-2 text-xs font-semibold text-white backdrop-blur transition hover:bg-zinc-900"
+        >
+          {muted ? "Unmute" : "Mute"}
+        </button>
+      ) : null}
+
       {failed ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-center text-white">
           <p className="px-6 text-lg font-medium">
