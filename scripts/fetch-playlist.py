@@ -3,9 +3,12 @@
 locally with segment URLs rewritten to absolute (so a static-hosted copy of the
 playlist still points at the origin's segment files).
 
+On Vercel this file is NOT used for the live site: vercel.json rewrites proxy
+/live/playlist.m3u8 (and /live/* segments) to infiniteslop.ai in real time.
+The local copy exists only for the local static preview, which cannot proxy.
+
 Writes to:
-  - public/playlist.m3u8   (included in every `npm run build`)
-  - dist/playlist.m3u8     (so the live preview can be refreshed without a rebuild)
+  - dist/live/playlist.m3u8  (served by the local static preview)
 
 Usage:
   python scripts/fetch-playlist.py
@@ -58,7 +61,7 @@ def main() -> int:
         print(f"ERROR fetching {SRC}: {exc}", file=sys.stderr)
         return 1
 
-    for dest in (ROOT / "public" / "playlist.m3u8", ROOT / "dist" / "playlist.m3u8"):
+    for dest in (ROOT / "dist" / "live" / "playlist.m3u8",):
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(text, encoding="utf-8")
         print(f"wrote {dest} ({len(text)} bytes)")

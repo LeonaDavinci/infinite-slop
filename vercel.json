@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/live/playlist.m3u8",
+      "destination": "https://infiniteslop.ai/live/playlist.m3u8"
+    },
+    {
+      "source": "/live/:path*",
+      "destination": "https://infiniteslop.ai/live/:path*"
+    }
+  ]
+}
