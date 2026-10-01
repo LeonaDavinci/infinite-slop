@@ -21,6 +21,7 @@ type HlsStatic = {
 export default function LiveStreamPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -28,14 +29,37 @@ export default function LiveStreamPlayer() {
 
     let hls: HlsInstance | null = null;
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let attempts = 0;
+
+    const scheduleRetry = () => {
+      if (cancelled || attempts >= 5) {
+        if (!cancelled) setFailed(true);
+        return;
+      }
+      attempts += 1;
+      retryTimer = setTimeout(() => {
+        if (cancelled) return;
+        setFailed(false);
+        if (hls) {
+          hls.destroy();
+          hls = null;
+        }
+        attach();
+      }, 4000);
+    };
 
     const attach = () => {
       const Hls = (window as unknown as { Hls?: HlsStatic }).Hls;
       if (Hls && Hls.isSupported()) {
         // Chrome / Edge / Firefox via hls.js (MSE)
-        const instance = new Hls();
+        const instance = new Hls({
+          lowLatencyMode: true,
+          manifestLoadingMaxRetry: 4,
+          manifestLoadingRetryDelay: 2000,
+        });
         instance.on(Hls.Events.ERROR, (_event, data) => {
-          if (data?.fatal) setFailed(true);
+          if (data?.fatal) scheduleRetry();
         });
         instance.loadSource(MANIFEST_URL);
         instance.attachMedia(video);
@@ -63,8 +87,16 @@ export default function LiveStreamPlayer() {
       document.head.appendChild(script);
     }
 
+    const onPlaying = () => setPlaying(true);
+    const onWaiting = () => setPlaying(false);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("waiting", onWaiting);
+
     return () => {
       cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("waiting", onWaiting);
       if (hls) hls.destroy();
     };
   }, []);
@@ -84,6 +116,14 @@ export default function LiveStreamPlayer() {
         disablePictureInPicture
         className="aspect-video w-full"
       />
+      {!failed && !playing ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-zinc-900 text-white">
+          <p className="flex items-center gap-2 text-sm">
+            <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
+            Connecting to the live stream…
+          </p>
+        </div>
+      ) : null}
       {failed ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-center text-white">
           <p className="px-6 text-lg font-medium">

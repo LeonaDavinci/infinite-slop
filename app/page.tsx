@@ -136,6 +136,35 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Live video player (HLS playlist proxied from infiniteslop.ai) */}
+        <section className="px-4 pb-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+                Watch the Infinite Slop live stream
+              </h2>
+              <p className="mt-4 text-lg text-zinc-600">
+                The live video feed is proxied in real time from the original
+                24/7 Infiniteslop AI broadcast.
+              </p>
+            </div>
+            <LiveStreamPlayer />
+            <p className="mt-4 text-center text-sm text-zinc-500">
+              Live feed proxied in real time from infiniteslop.ai. Playback
+              works in Chrome, Edge, Safari and Firefox via hls.js — or{" "}
+              <a
+                href="https://infiniteslop.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#C5156B] underline hover:text-zinc-900"
+              >
+                watch on the official website
+              </a>
+              .
+            </p>
+          </div>
+        </section>
+
         {/* Stats */}
         <section className="border-y border-zinc-200 bg-zinc-50 px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-4xl flex-col justify-around gap-8 text-center sm:flex-row">
@@ -225,35 +254,6 @@ export default function Home() {
                 .
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* Live video player (HLS playlist mirrored from infiniteslop.ai) */}
-        <section className="px-4 py-24 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-10 text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-                Watch the Infinite Slop live stream
-              </h2>
-              <p className="mt-4 text-lg text-zinc-600">
-                The live video feed is mirrored in real time from the original
-                24/7 Infiniteslop AI broadcast.
-              </p>
-            </div>
-            <LiveStreamPlayer />
-            <p className="mt-4 text-center text-sm text-zinc-500">
-              Live feed proxied in real time from infiniteslop.ai. Playback
-              works in Chrome, Edge, Safari and Firefox via hls.js — or{" "}
-              <a
-                href="https://infiniteslop.ai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-[#C5156B] underline hover:text-zinc-900"
-              >
-                watch on the official website
-              </a>
-              .
-            </p>
           </div>
         </section>
 
