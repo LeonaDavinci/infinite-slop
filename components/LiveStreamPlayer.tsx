@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const MANIFEST_URL = "/live/playlist.m3u8";
 const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
-const POSTER = "/infiniteslop-live-stream.jpg";
+const POSTER = "/video.jpg";
 
 type HlsErrorData = { fatal?: boolean };
 type HlsInstance = {

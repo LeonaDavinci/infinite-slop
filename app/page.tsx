@@ -121,18 +121,6 @@ export default function Home() {
                 Read the original announcement
               </a>
             </div>
-            <p className="mt-6 text-sm text-zinc-500">
-              Inspired by{" "}
-              <a
-                href={site.originPost}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-zinc-700 underline hover:text-zinc-900"
-              >
-                {site.originPostLabel}
-              </a>
-              .
-            </p>
           </div>
         </section>
 
