@@ -138,7 +138,7 @@ export default function Home() {
             </div>
             <LiveStreamPlayer />
             <p className="mt-4 text-center text-sm text-zinc-500">
-              Live feed proxied in real time from infiniteslop.ai. Playback
+              Live feed proxied in real time from infiniteslop. Playback
               works in Chrome, Edge, Safari and Firefox via hls.js — or{" "}
               <a
                 href="https://infiniteslop.ai/"
