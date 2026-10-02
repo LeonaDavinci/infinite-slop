@@ -25,6 +25,19 @@ export default function LiveStreamPlayer() {
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [countdown, setCountdown] = useState(3);
+
+  // Cosmetic 3 · 2 · 1 placeholder while the first segments download,
+  // so the overlay never looks frozen.
+  useEffect(() => {
+    if (!started || failed || playing) return;
+    setCountdown(3);
+    const id = setInterval(
+      () => setCountdown((c) => (c <= 1 ? 3 : c - 1)),
+      1000
+    );
+    return () => clearInterval(id);
+  }, [started, failed, playing]);
 
   // Only start loading the stream after the visitor clicks play.
   useEffect(() => {
@@ -157,11 +170,18 @@ export default function LiveStreamPlayer() {
       ) : null}
 
       {started && !failed && !playing ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-zinc-900 text-white">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-white">
           <p className="flex items-center gap-2 text-sm">
             <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
             Connecting to the live stream…
           </p>
+          <p
+            key={countdown}
+            className="mt-3 text-4xl font-semibold tabular-nums text-white/90"
+          >
+            {countdown}
+          </p>
+          <p className="mt-1 text-xs text-white/50">Hang tight…</p>
         </div>
       ) : null}
 
