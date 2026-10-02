@@ -27,15 +27,13 @@ export default function LiveStreamPlayer() {
   const [muted, setMuted] = useState(true);
   const [countdown, setCountdown] = useState(3);
 
-  // Cosmetic 3 · 2 · 1 placeholder while the first segments download,
-  // so the overlay never looks frozen.
+  // Cosmetic 3 · 2 · 1 · 0 placeholder while the first segments download,
+  // so the overlay never looks frozen. Counts down exactly once and then
+  // rests at 0 — it never loops back to 3.
   useEffect(() => {
     if (!started || failed || playing) return;
     setCountdown(3);
-    const id = setInterval(
-      () => setCountdown((c) => (c <= 1 ? 3 : c - 1)),
-      1000
-    );
+    const id = setInterval(() => setCountdown((c) => (c <= 1 ? 0 : c - 1)), 1000);
     return () => clearInterval(id);
   }, [started, failed, playing]);
 
