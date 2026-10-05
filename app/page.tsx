@@ -146,7 +146,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="font-medium text-[#C5156B] underline hover:text-zinc-900"
               >
-                nextio infinite-slop
+                levelsio infinite-slop
               </a>
               .
             </p>
