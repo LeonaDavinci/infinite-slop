@@ -138,15 +138,15 @@ export default function Home() {
             </div>
             <LiveStreamPlayer />
             <p className="mt-4 text-center text-sm text-zinc-500">
-              Live feed proxied in real time from infiniteslop. Playback
-              works in Chrome, Edge, Safari and Firefox via hls.js — or{" "}
+              Live feed proxied in real time from infiniteslop. Playback works in
+              Chrome, Edge, Safari and Firefox — or watch on the{" "}
               <a
                 href="https://infiniteslop.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-[#C5156B] underline hover:text-zinc-900"
               >
-                watch on the official website
+                nextio infinite-slop
               </a>
               .
             </p>
