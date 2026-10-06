@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MANIFEST_URL = "/live/playlist.m3u8";
 const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
 const POSTER = "/video.jpg";
+const BACKUP_URL = "/backup.mp4";
+
+/** How often we re-check whether the upstream window still has real segments. */
+const SIGNAL_CHECK_MS = 60_000;
+/** How long we keep recording once real signal comes back. */
+const RECORD_MS = 180_000;
 
 type HlsErrorData = { fatal?: boolean };
 type HlsInstance = {
@@ -19,13 +25,53 @@ type HlsStatic = {
   Events: { ERROR: string };
 };
 
+type Source = "idle" | "live" | "backup";
+type Recorder = {
+  start: (timeslice?: number) => void;
+  stop: () => void;
+  state: "recording" | "inactive";
+  ondataavailable: ((ev: { data: Blob }) => void) | null;
+  onstop: (() => void) | null;
+};
+
+/**
+ * Decide whether the upstream playlist still carries real programme segments.
+ * `filler.ts` is the origin's "signal lost / retuning" slate — a window made up
+ * entirely of filler means there is nothing worth watching right now.
+ */
+async function hasRealSignal(signal: AbortSignal): Promise<boolean> {
+  const res = await fetch(`${MANIFEST_URL}?probe=${Date.now()}`, {
+    cache: "no-store",
+    signal,
+  });
+  if (!res.ok) return false;
+  const text = await res.text();
+  const segments = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+  if (segments.length === 0) return false;
+  return segments.some((seg) => !/^filler\.m?ts$/i.test(seg.split("/").pop() ?? ""));
+}
+
 export default function LiveStreamPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<HlsInstance | null>(null);
+  const recorderRef = useRef<Recorder | null>(null);
+  const recordTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef(0);
+  const sourceRef = useRef<Source>("idle");
+
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(true);
   const [countdown, setCountdown] = useState(3);
+  const [source, setSource] = useState<Source>("idle");
+  const [lostAt, setLostAt] = useState<number | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recordLeft, setRecordLeft] = useState(0);
+  const [clips, setClips] = useState<{ name: string; url: string; size: number }[]>([]);
 
   // Cosmetic 3 · 2 · 1 · 0 placeholder while the first segments download,
   // so the overlay never looks frozen. Counts down exactly once and then
@@ -37,72 +83,237 @@ export default function LiveStreamPlayer() {
     return () => clearInterval(id);
   }, [started, failed, playing]);
 
-  // Only start loading the stream after the visitor clicks play.
+  // ---- recording -----------------------------------------------------------
+  const stopRecording = useCallback(() => {
+    if (recordTimerRef.current) {
+      clearTimeout(recordTimerRef.current);
+      recordTimerRef.current = null;
+    }
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+    const rec = recorderRef.current;
+    recorderRef.current = null;
+    if (rec && rec.state === "recording") {
+      try {
+        rec.stop();
+      } catch {
+        /* already stopped */
+      }
+    }
+    setRecording(false);
+    setRecordLeft(0);
+  }, []);
+
+  // Captures the <video> element through a canvas and keeps the last clip as an
+  // object URL so the visitor can download it. Only runs while real signal is on.
+  const startRecording = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || recorderRef.current) return;
+    if (typeof MediaRecorder === "undefined") return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    if (!ctx || typeof canvas.captureStream !== "function") return;
+
+    let stream: MediaStream;
+    try {
+      stream = canvas.captureStream(30);
+    } catch {
+      return;
+    }
+
+    const mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm", "video/mp4"].find(
+      (m) => MediaRecorder.isTypeSupported(m),
+    );
+    let rec: Recorder;
+    try {
+      rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 4_000_000 } : undefined) as Recorder;
+    } catch {
+      stream.getTracks().forEach((t) => t.stop());
+      return;
+    }
+
+    const chunks: Blob[] = [];
+    rec.ondataavailable = (ev) => {
+      if (ev.data && ev.data.size > 0) chunks.push(ev.data);
+    };
+    rec.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      }
+      if (chunks.length === 0) return;
+      const type = chunks[0].type || "video/webm";
+      const blob = new Blob(chunks, { type });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      const url = URL.createObjectURL(blob);
+      const ext = type.includes("mp4") ? "mp4" : "webm";
+      const name = `infinite-slop-${stamp}.${ext}`;
+      setClips((prev) => [{ name, url, size: blob.size }, ...prev].slice(0, 3));
+    };
+
+    const pump = () => {
+      if (video.readyState >= 2) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+      rafRef.current = requestAnimationFrame(pump);
+    };
+    pump();
+
+    rec.start(1000);
+    recorderRef.current = rec;
+    setRecording(true);
+    setRecordLeft(Math.round(RECORD_MS / 1000));
+
+    const startedAt = Date.now();
+    const tick = setInterval(() => {
+      const left = RECORD_MS - (Date.now() - startedAt);
+      setRecordLeft(Math.max(0, Math.round(left / 1000)));
+    }, 1000);
+    recordTimerRef.current = setTimeout(() => {
+      clearInterval(tick);
+      stopRecording();
+    }, RECORD_MS);
+  }, [stopRecording]);
+
+
+  // ---- source switching ----------------------------------------------------
+  const teardownHls = useCallback(() => {
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+  }, []);
+
+  // Detach whatever the element is currently playing. hls.js attaches a
+  // MediaSource to `src`; setting `src` back to a plain URL is not enough while
+  // that attachment is live, and `load()` throws InvalidStateError. Detach the
+  // MediaSource first, then clear the attribute, then reset.
+  const detachMedia = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      video.pause();
+    } catch {
+      /* nothing loaded yet */
+    }
+    if (video.srcObject) {
+      try {
+        video.srcObject = null;
+      } catch {
+        /* Safari can refuse while a MediaSource is still open */
+      }
+    }
+    video.removeAttribute("src");
+    try {
+      video.load();
+    } catch {
+      /* ignore InvalidStateError, the next src assignment re-runs load() */
+    }
+  }, []);
+
+  const attachLive = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    teardownHls();
+    // Coming back from the standby loop: drop the mp4 source so MSE can take over.
+    video.loop = false;
+    detachMedia();
+    setFailed(false);
+
+    const Hls = (window as unknown as { Hls?: HlsStatic }).Hls;
+    if (Hls && Hls.isSupported()) {
+      // Chrome / Edge / Firefox via hls.js (MSE)
+      const instance = new Hls({
+        lowLatencyMode: true,
+        manifestLoadingMaxRetry: 4,
+        manifestLoadingRetryDelay: 2000,
+      });
+      instance.on(Hls.Events.ERROR, (_event, data) => {
+        // Ignore errors from an instance we already tore down: switching to the
+        // standby loop destroys hls and it can emit one last fatal error, which
+        // must not flip the player into the "cannot play" state.
+        if (hlsRef.current !== instance) return;
+        if (data?.fatal) setFailed(true);
+      });
+      instance.loadSource(MANIFEST_URL);
+      instance.attachMedia(video);
+      hlsRef.current = instance;
+      video.play().catch(() => {});
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Safari / iOS: native HLS
+      video.src = MANIFEST_URL;
+      video.play().catch(() => {});
+    } else {
+      setFailed(true);
+    }
+  }, [teardownHls, detachMedia]);
+
+  const attachBackup = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    teardownHls();
+    detachMedia();
+    video.loop = true;
+    // hls.js writes its MediaSource blob URL onto `src` and clears it
+    // asynchronously while tearing down, which would clobber an assignment made
+    // in the same tick. Re-assert the standby source on the next tick.
+    window.setTimeout(() => {
+      const el = videoRef.current;
+      if (!el || sourceRef.current !== "backup") return;
+      el.src = BACKUP_URL;
+      el.play().catch(() => {});
+    }, 0);
+  }, [teardownHls, detachMedia]);
+
+  const useSource = useCallback(
+    (next: Source) => {
+      if (sourceRef.current === next) return;
+      sourceRef.current = next;
+      setSource(next);
+      if (next === "backup") {
+        stopRecording();
+        setFailed(false);
+        attachBackup();
+      } else {
+        attachLive();
+      }
+    },
+    [attachBackup, attachLive, stopRecording],
+  );
+
+  // ---- boot: click to play, then start the health probe ---------------------
   useEffect(() => {
     if (!started) return;
     const video = videoRef.current;
     if (!video) return;
 
-    let hls: HlsInstance | null = null;
     let cancelled = false;
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
-    let attempts = 0;
-
-    const scheduleRetry = () => {
+    const loadHls = () => {
       if (cancelled) return;
-      if (attempts >= 5) {
-        setFailed(true);
-        return;
-      }
-      attempts += 1;
-      retryTimer = setTimeout(() => {
-        if (cancelled) return;
-        setFailed(false);
-        if (hls) {
-          hls.destroy();
-          hls = null;
-        }
-        attach();
-      }, 4000);
-    };
-
-    const attach = () => {
       const Hls = (window as unknown as { Hls?: HlsStatic }).Hls;
-      if (Hls && Hls.isSupported()) {
-        // Chrome / Edge / Firefox via hls.js (MSE)
-        const instance = new Hls({
-          lowLatencyMode: true,
-          manifestLoadingMaxRetry: 4,
-          manifestLoadingRetryDelay: 2000,
-        });
-        instance.on(Hls.Events.ERROR, (_event, data) => {
-          if (data?.fatal) scheduleRetry();
-        });
-        instance.loadSource(MANIFEST_URL);
-        instance.attachMedia(video);
-        hls = instance;
-        video.play().catch(() => {});
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        // Safari / iOS: native HLS
-        video.src = MANIFEST_URL;
-        video.play().catch(() => {});
+      if (Hls) {
+        attachLive();
       } else {
-        setFailed(true);
+        const script = document.createElement("script");
+        script.src = HLS_CDN;
+        script.async = true;
+        script.onload = () => {
+          if (!cancelled) attachLive();
+        };
+        script.onerror = () => setFailed(true);
+        document.head.appendChild(script);
       }
     };
 
-    if ((window as unknown as { Hls?: HlsStatic }).Hls) {
-      attach();
-    } else {
-      const script = document.createElement("script");
-      script.src = HLS_CDN;
-      script.async = true;
-      script.onload = () => {
-        if (!cancelled) attach();
-      };
-      script.onerror = () => setFailed(true);
-      document.head.appendChild(script);
-    }
+    sourceRef.current = "live";
+    setSource("live");
+    loadHls();
 
     const onPlaying = () => setPlaying(true);
     const onWaiting = () => setPlaying(false);
@@ -111,12 +322,59 @@ export default function LiveStreamPlayer() {
 
     return () => {
       cancelled = true;
-      if (retryTimer) clearTimeout(retryTimer);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("waiting", onWaiting);
-      if (hls) hls.destroy();
+      stopRecording();
+      teardownHls();
     };
-  }, [started]);
+  }, [started, attachLive, teardownHls, stopRecording]);
+
+  // ---- once a minute: is the upstream still airing real programme? ---------
+  useEffect(() => {
+    if (!started) return;
+    const controller = new AbortController();
+    let stopped = false;
+
+    const check = async () => {
+      if (stopped) return;
+      let alive = false;
+      try {
+        alive = await hasRealSignal(controller.signal);
+      } catch {
+        alive = false;
+      }
+      if (stopped) return;
+
+      if (!alive) {
+        setLostAt(Date.now());
+        useSource("backup");
+      } else {
+        setLostAt(null);
+        const wasDown = sourceRef.current === "backup";
+        useSource("live");
+        // Signal came back: grab three minutes of it before it can drop again.
+        if (wasDown && !recorderRef.current) startRecording();
+      }
+    };
+
+    check();
+    const id = setInterval(check, SIGNAL_CHECK_MS);
+    return () => {
+      stopped = true;
+      controller.abort();
+      clearInterval(id);
+    };
+  }, [started, useSource, startRecording]);
+
+  // Release saved clip URLs on unmount.
+  const clipsRef = useRef(clips);
+  clipsRef.current = clips;
+  useEffect(() => {
+    return () => {
+      clipsRef.current.forEach((c) => URL.revokeObjectURL(c.url));
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const toggleSound = () => {
     const video = videoRef.current;
@@ -126,8 +384,14 @@ export default function LiveStreamPlayer() {
     if (!video.muted) video.play().catch(() => {});
   };
 
+  const showStandbyBadge = started && source === "backup" && !failed;
+
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl shadow-[#C5156B]/10">
+    <div
+      data-source={source}
+      data-recording={recording ? "true" : "false"}
+      className="relative overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl shadow-[#C5156B]/10"
+    >
       <video
         ref={videoRef}
         data-live-video=""
@@ -167,7 +431,7 @@ export default function LiveStreamPlayer() {
         </button>
       ) : null}
 
-      {started && !failed && !playing ? (
+      {started && !failed && !playing && source !== "backup" ? (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-white">
           <p className="flex items-center gap-2 text-sm">
             <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
@@ -183,6 +447,36 @@ export default function LiveStreamPlayer() {
         </div>
       ) : null}
 
+      {/* Standby / recording status strip */}
+      {started && !failed && (showStandbyBadge || recording) ? (
+        <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-2">
+          {showStandbyBadge ? (
+            <span
+              data-standby-badge=""
+              className="inline-flex items-center gap-2 rounded-full bg-zinc-900/85 px-3.5 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur"
+            >
+              <span className="h-2 w-2 animate-ping rounded-full bg-amber-400"></span>
+              Upstream signal lost — playing the standby loop
+              {lostAt ? (
+                <span className="font-normal text-amber-200/70">
+                  since {new Date(lostAt).toLocaleTimeString()}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
+          {recording ? (
+            <span
+              data-rec-badge=""
+              className="inline-flex items-center gap-2 rounded-full bg-zinc-900/85 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur"
+            >
+              <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
+              REC — capturing {Math.floor(recordLeft / 60)}:
+              {String(recordLeft % 60).padStart(2, "0")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
       {started && !failed ? (
         <button
           type="button"
@@ -191,6 +485,22 @@ export default function LiveStreamPlayer() {
         >
           {muted ? "Unmute" : "Mute"}
         </button>
+      ) : null}
+
+      {/* Clips captured after signal recovered */}
+      {clips.length > 0 ? (
+        <div className="absolute bottom-14 left-4 right-16 flex flex-col gap-1.5">
+          {clips.map((clip) => (
+            <a
+              key={clip.url}
+              href={clip.url}
+              download={clip.name}
+              className="pointer-events-auto w-fit rounded-full bg-zinc-900/85 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-[#C5156B]"
+            >
+              ↓ Save clip ({Math.max(1, Math.round(clip.size / 1024))} KB)
+            </a>
+          ))}
+        </div>
       ) : null}
 
       {failed ? (
