@@ -5,11 +5,14 @@ Serves the built static export (dist/) over a throwaway HTTP server and
 intercepts the upstream manifest so both upstream states can be simulated
 deterministically:
 
-  phase 1  filler-only window  -> the player must switch <video> to /backup.mp4
-                                    and show the standby badge
+  phase 1  filler-only window  -> no live signal, so the player must fall back
+                                    to the origin ARCHIVE replay (recent clips),
+                                    NOT the standby mp4
   phase 2  real segments back  -> the player must switch back to the HLS manifest
                                     AND start the 3-minute REC capture
   phase 3  REC countdown ticks and the clip becomes a downloadable blob URL
+  phase 4  archive feed also dead -> the player must fall all the way down to
+                                    /backup.mp4 and show the standby badge
 
 Requires a build first (dist/index.html).
 
@@ -57,6 +60,19 @@ REAL_PLAYLIST = """#EXTM3U
 211730.ts
 """
 
+ARCHIVE_PLAYLIST = """#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:16
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-DISCONTINUITY
+#EXTINF:15.123,
+clip?id=212499
+#EXT-X-DISCONTINUITY
+#EXTINF:15.123,
+clip?id=212498
+#EXT-X-ENDLIST
+"""
+
 MPEGURL = "application/vnd.apple.mpegurl"
 HLS_LOCAL = FIXTURES / "hls.min.js"
 HLS_URL = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"
@@ -64,8 +80,8 @@ SEG_TS = FIXTURES / "seg.ts"
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    state = {"mode": "filler"}
-    hits = {"filler": 0, "real": 0, "backup": 0}
+    state = {"mode": "filler", "archive_ok": True}
+    hits = {"filler": 0, "real": 0, "archive": 0, "backup": 0}
 
     def log_message(self, *args):
         pass
@@ -85,6 +101,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             Handler.hits[mode] += 1
             body = (REAL_PLAYLIST if mode == "real" else FILLER_PLAYLIST).encode()
             self._send(200, body, MPEGURL)
+        elif path.startswith("/archive/playlist.m3u8"):
+            Handler.hits["archive"] += 1
+            # The archive feed exposes real clips; hls.js transmuxes the mp4
+            # badly, so hand back the real segment bytes for the transmux path.
+            self._send(200, (ARCHIVE_PLAYLIST if Handler.state["archive_ok"] else "#EXTM3U\n").encode(), MPEGURL)
+        elif path.startswith("/archive/clip"):
+            self._send(200, SEG_TS.read_bytes(), "video/mp2t")
         elif path == "/backup.mp4":
             Handler.hits["backup"] += 1
             self._send(200, BACKUP.read_bytes(), "video/mp4")
@@ -142,6 +165,10 @@ def main() -> int:
         )
         return 1
 
+    Handler.state["mode"] = "filler"
+    Handler.state["archive_ok"] = True
+    Handler.hits.update({"filler": 0, "real": 0, "archive": 0, "backup": 0})
+
     port = free_port()
     socketserver.TCPServer.allow_reuse_address = True
     httpd = socketserver.TCPServer(("127.0.0.1", port), Handler)
@@ -187,14 +214,17 @@ def main() -> int:
         source1 = page.eval_on_selector("video[data-live-video]", "v => v.closest('[data-source]')?.dataset.source")
         backup_fetched = Handler.hits.get("backup", 0)
         badge1 = page.locator("[data-standby-badge]").count()
+        arch1 = page.locator("[data-archive-badge]").count()
         print(f"1) filler window  -> source={source1} src={src1}")
-        print(f"   standby badge: {bool(badge1)}   /backup.mp4 fetches: {backup_fetched}   manifest hits={Handler.hits}")
-        if source1 != "backup":
-            failures.append(f"expected data-source=backup during filler-only window, got {source1!r}")
-        if backup_fetched == 0:
-            failures.append("the standby mp4 was never fetched")
-        if badge1 == 0:
-            failures.append("standby badge not shown while on the backup loop")
+        print(f"   archive badge: {bool(arch1)}  standby badge: {bool(badge1)}   hits={Handler.hits}")
+        if source1 != "archive":
+            failures.append(f"expected data-source=archive during filler-only window, got {source1!r}")
+        if arch1 == 0:
+            failures.append("archive replay badge not shown")
+        if badge1 != 0:
+            failures.append("standby badge shown while the archive feed was still alive")
+        if Handler.hits["backup"] != 0:
+            failures.append("backup.mp4 was fetched before the archive replay was tried")
 
         # --- phase 2: real signal -> live + REC ----------------------------
         Handler.state["mode"] = "real"
@@ -214,6 +244,8 @@ def main() -> int:
             failures.append("REC indicator did not appear after signal recovered")
         if source2 != "live":
             failures.append(f"expected data-source=live after recovery, got {source2!r}")
+        if Handler.hits["backup"] != 0:
+            failures.append("standby mp4 was used while the archive feed was still available")
 
         # --- phase 3: countdown runs and a clip blob is produced ------------
         page.screenshot(path=str(FIXTURES / "standback-rec.png"))
@@ -225,6 +257,25 @@ def main() -> int:
         print(f"3) saved clips so far: {clips}")
         if not clips:
             print("   (clip still recording - the 3-minute window has not elapsed, as expected)")
+
+        # --- phase 4: archive feed dies too -> standby mp4 -------------------
+        Handler.state["mode"] = "filler"
+        Handler.state["archive_ok"] = False
+        print("   archive feed flipped to empty; waiting for the 1-minute probe…")
+        standby = False
+        for _ in range(80):
+            page.wait_for_timeout(1000)
+            if page.locator("[data-standby-badge]").count() > 0:
+                standby = True
+                break
+        source4 = page.eval_on_selector(
+            "video[data-live-video]", "v => v.closest('[data-source]')?.dataset.source"
+        )
+        print(f"4) archive dead    -> source={source4}   standby badge: {standby}   hits={Handler.hits}")
+        if source4 != "backup":
+            failures.append(f"expected data-source=backup once the archive feed died, got {source4!r}")
+        if not standby:
+            failures.append("standby badge not shown while on the backup loop")
 
         browser.close()
 

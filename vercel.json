@@ -8,6 +8,14 @@
     {
       "source": "/live/:path*",
       "destination": "https://infiniteslop.ai/live/:path*"
+    },
+    {
+      "source": "/archive/playlist.m3u8",
+      "destination": "https://infiniteslop.ai/api/channel?ch=newest&limit=150"
+    },
+    {
+      "source": "/archive/clip",
+      "destination": "https://infiniteslop.ai/api/clip"
     }
   ]
 }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const MANIFEST_URL = "/live/playlist.m3u8";
+const ARCHIVE_URL = "/archive/playlist.m3u8";
 const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
 const POSTER = "/video.jpg";
 const BACKUP_URL = "/backup.mp4";
@@ -25,7 +26,7 @@ type HlsStatic = {
   Events: { ERROR: string };
 };
 
-type Source = "idle" | "live" | "backup";
+type Source = "idle" | "live" | "archive" | "backup";
 type Recorder = {
   start: (timeslice?: number) => void;
   stop: () => void;
@@ -35,9 +36,19 @@ type Recorder = {
 };
 
 /**
- * Decide whether the upstream playlist still carries real programme segments.
- * `filler.ts` is the origin's "signal lost / retuning" slate — a window made up
- * entirely of filler means there is nothing worth watching right now.
+ * Read the segment URIs out of an HLS playlist.
+ */
+function parseSegments(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+}
+
+/**
+ * Decide whether the upstream *live* playlist still carries real programme.
+ * `filler.ts` is the origin's "signal lost / retuning" slate — a live window
+ * made up entirely of filler means nothing new is being broadcast right now.
  */
 async function hasRealSignal(signal: AbortSignal): Promise<boolean> {
   const res = await fetch(`${MANIFEST_URL}?probe=${Date.now()}`, {
@@ -45,13 +56,26 @@ async function hasRealSignal(signal: AbortSignal): Promise<boolean> {
     signal,
   });
   if (!res.ok) return false;
-  const text = await res.text();
-  const segments = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"));
+  const segments = parseSegments(await res.text());
   if (segments.length === 0) return false;
   return segments.some((seg) => !/^filler\.m?ts$/i.test(seg.split("/").pop() ?? ""));
+}
+
+/**
+ * The origin keeps the last ~150 AI-generated clips (about 37 minutes) as a
+ * VOD playlist — that is the "swipe back through recent programmes" feed on
+ * infiniteslop.ai. When the live window is all filler we replay those instead
+ * of a flat placeholder, so the page always shows real generated content.
+ */
+async function hasArchive(signal: AbortSignal): Promise<boolean> {
+  const res = await fetch(`${ARCHIVE_URL}?probe=${Date.now()}`, {
+    cache: "no-store",
+    signal,
+  });
+  if (!res.ok) return false;
+  const text = await res.text();
+  if (!text.includes("#EXTM3U")) return false;
+  return parseSegments(text).length > 0;
 }
 
 export default function LiveStreamPlayer() {
@@ -271,6 +295,45 @@ export default function LiveStreamPlayer() {
     }, 0);
   }, [teardownHls, detachMedia]);
 
+  // Replay the origin's recent-clips feed. It is a VOD playlist, so it simply
+  // ends (or we stop) — nothing to top up.
+  const attachArchive = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    teardownHls();
+    detachMedia();
+    setFailed(false);
+
+    const Hls = (window as unknown as { Hls?: HlsStatic }).Hls;
+    if (Hls && Hls.isSupported()) {
+      const instance = new Hls({ lowLatencyMode: false });
+      instance.on(Hls.Events.ERROR, (_event, data) => {
+        if (hlsRef.current !== instance) return;
+        // The archive feed is stale-able; if it dies, drop to the standby clip.
+        if (data?.fatal) {
+          setSource("backup");
+          sourceRef.current = "backup";
+          attachBackup();
+        }
+      });
+      instance.loadSource(ARCHIVE_URL);
+      instance.attachMedia(video);
+      hlsRef.current = instance;
+      video.play().catch(() => {});
+      // VOD playlist: replay it when the viewer reaches the end.
+      video.onended = () => {
+        if (sourceRef.current !== "archive") return;
+        instance.loadSource(ARCHIVE_URL);
+      };
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.loop = true;
+      video.src = ARCHIVE_URL;
+      video.play().catch(() => {});
+    } else {
+      setFailed(true);
+    }
+  }, [teardownHls, detachMedia, attachBackup]);
+
   const useSource = useCallback(
     (next: Source) => {
       if (sourceRef.current === next) return;
@@ -280,11 +343,15 @@ export default function LiveStreamPlayer() {
         stopRecording();
         setFailed(false);
         attachBackup();
+      } else if (next === "archive") {
+        stopRecording();
+        setFailed(false);
+        attachArchive();
       } else {
         attachLive();
       }
     },
-    [attachBackup, attachLive, stopRecording],
+    [attachBackup, attachArchive, attachLive, stopRecording],
   );
 
   // ---- boot: click to play, then start the health probe ---------------------
@@ -345,16 +412,29 @@ export default function LiveStreamPlayer() {
       }
       if (stopped) return;
 
-      if (!alive) {
-        setLostAt(Date.now());
-        useSource("backup");
-      } else {
+      if (alive) {
         setLostAt(null);
-        const wasDown = sourceRef.current === "backup";
+        const wasDown = sourceRef.current === "backup" || sourceRef.current === "archive";
         useSource("live");
         // Signal came back: grab three minutes of it before it can drop again.
         if (wasDown && !recorderRef.current) startRecording();
+        return;
       }
+
+      // Live window is all filler. Prefer replaying what the origin already
+      // generated in the last ~37 minutes over a placeholder clip.
+      let archived = false;
+      if (sourceRef.current !== "archive") {
+        try {
+          archived = await hasArchive(controller.signal);
+        } catch {
+          archived = false;
+        }
+      }
+      if (stopped) return;
+
+      setLostAt(Date.now());
+      useSource(archived ? "archive" : "backup");
     };
 
     check();
@@ -384,6 +464,7 @@ export default function LiveStreamPlayer() {
     if (!video.muted) video.play().catch(() => {});
   };
 
+  const showArchiveBadge = started && source === "archive" && !failed;
   const showStandbyBadge = started && source === "backup" && !failed;
 
   return (
@@ -431,7 +512,7 @@ export default function LiveStreamPlayer() {
         </button>
       ) : null}
 
-      {started && !failed && !playing && source !== "backup" ? (
+      {started && !failed && !playing && source === "live" ? (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-white">
           <p className="flex items-center gap-2 text-sm">
             <span className="h-2 w-2 animate-ping rounded-full bg-[#C5156B]"></span>
@@ -447,9 +528,23 @@ export default function LiveStreamPlayer() {
         </div>
       ) : null}
 
-      {/* Standby / recording status strip */}
-      {started && !failed && (showStandbyBadge || recording) ? (
+      {/* Standby / archive / recording status strip */}
+      {started && !failed && (showStandbyBadge || showArchiveBadge || recording) ? (
         <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-2">
+          {showArchiveBadge ? (
+            <span
+              data-archive-badge=""
+              className="inline-flex items-center gap-2 rounded-full bg-zinc-900/85 px-3.5 py-1.5 text-xs font-semibold text-sky-300 backdrop-blur"
+            >
+              <span className="h-2 w-2 animate-ping rounded-full bg-sky-400"></span>
+              Live signal lost — replaying recent episodes
+              {lostAt ? (
+                <span className="font-normal text-sky-200/70">
+                  since {new Date(lostAt).toLocaleTimeString()}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
           {showStandbyBadge ? (
             <span
               data-standby-badge=""
